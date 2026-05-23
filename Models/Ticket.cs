@@ -1,5 +1,7 @@
-namespace service_eventos_eventual.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace service_eventos_eventual.Models;
+[Table("tickets")]
 public class Ticket
 {
     public int Id { get; set; }

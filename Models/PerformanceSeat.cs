@@ -1,5 +1,7 @@
-namespace service_eventos_eventual.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
+namespace service_eventos_eventual.Models;
+[Table("performance_seats")]
 public class PerformanceSeat
 {
     public int Id { get; set; }
