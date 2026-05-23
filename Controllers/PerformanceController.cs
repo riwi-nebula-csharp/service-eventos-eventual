@@ -6,11 +6,11 @@ namespace service_eventos_eventual.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlayController : ControllerBase
+public class PerformanceController : ControllerBase
 {
-    private readonly IPlayService _service;
+    private readonly IPerformanceService _service;
 
-    public PlayController(IPlayService service)
+    public PerformanceController(IPerformanceService service)
     {
         _service = service;
     }
@@ -38,7 +38,7 @@ public class PlayController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] PlayRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] PerformanceRequestDto dto)
     {
         var response = await _service.CreateAsync(dto);
         if (!response.Success) return BadRequest(response);
@@ -46,7 +46,7 @@ public class PlayController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] PlayRequestDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] PerformanceRequestDto dto)
     {
         var response = await _service.UpdateAsync(id, dto);
         if (!response.Success) return NotFound(response);

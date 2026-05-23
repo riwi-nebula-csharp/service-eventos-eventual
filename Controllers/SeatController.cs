@@ -6,11 +6,11 @@ namespace service_eventos_eventual.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PlayController : ControllerBase
+public class SeatController : ControllerBase
 {
-    private readonly IPlayService _service;
+    private readonly ISeatService _service;
 
-    public PlayController(IPlayService service)
+    public SeatController(ISeatService service)
     {
         _service = service;
     }
@@ -19,13 +19,6 @@ public class PlayController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var response = await _service.GetAllAsync();
-        return Ok(response);
-    }
-
-    [HttpGet("deleted")]
-    public async Task<IActionResult> GetAllDeleted()
-    {
-        var response = await _service.GetAllDeletedAsync();
         return Ok(response);
     }
 
@@ -38,7 +31,7 @@ public class PlayController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] PlayRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] SeatRequestDto dto)
     {
         var response = await _service.CreateAsync(dto);
         if (!response.Success) return BadRequest(response);
@@ -46,17 +39,9 @@ public class PlayController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] PlayRequestDto dto)
+    public async Task<IActionResult> Update(int id, [FromBody] SeatRequestDto dto)
     {
         var response = await _service.UpdateAsync(id, dto);
-        if (!response.Success) return NotFound(response);
-        return Ok(response);
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var response = await _service.DeleteAsync(id);
         if (!response.Success) return NotFound(response);
         return Ok(response);
     }
