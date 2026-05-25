@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using service_eventos_eventual.Data;
+using service_eventos_eventual.Database.Data;
 using service_eventos_eventual.DTOs;
 using service_eventos_eventual.Models;
 using service_eventos_eventual.Response;

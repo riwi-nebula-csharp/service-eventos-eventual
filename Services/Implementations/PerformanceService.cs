@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using service_eventos_eventual.Data;
+using service_eventos_eventual.Database.Data;
+using service_eventos_eventual.Database.Seeders;
 using service_eventos_eventual.DTOs;
 using service_eventos_eventual.Models;
 using service_eventos_eventual.Response;
@@ -233,6 +234,9 @@ public class PerformanceService : IPerformanceService
 
             _context.Performances.Add(performance);
             await _context.SaveChangesAsync();
+
+            // Auto-generate performance seats
+            await PerformanceSeatSeeder.SeedAsync(_context, performance.Id);
 
             // Load play name for response
             var playName = await _context.Plays

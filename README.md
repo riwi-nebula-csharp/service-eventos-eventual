@@ -12,7 +12,8 @@
 | Get     | /api/play/deleted | GetAllDeleted       |
 
 # Seat #
-
+<!-- El metodo create no debe ser utilizado ya que rompe las cosas,
+    To Do: Elimimar de forma segura el create-->
 | Metodo  | Ruta              | Nombre              |
 |---------|-------------------|---------------------|
 | Post    | /api/seat         | Create              |

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using service_eventos_eventual.Models;
 
-namespace service_eventos_eventual.Data;
+namespace service_eventos_eventual.Database.Data;
 
 public class TeatroEventsDbContext : DbContext
 {
