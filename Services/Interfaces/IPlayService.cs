@@ -9,6 +9,6 @@ public interface IPlayService
     Task<ServiceResponse<IEnumerable<PlayResponseDto>>> GetAllDeletedAsync();
     Task<ServiceResponse<PlayResponseDto?>> GetByIdAsync(int id);
     Task<ServiceResponse<PlayResponseDto>> CreateAsync(PlayRequestDto dto);
-    Task<ServiceResponse<PlayResponseDto?>> UpdateAsync(int id, PlayRequestDto dto);
+    Task<ServiceResponse<PlayResponseDto>> UpdateAsync(int id, PlayRequestDto dto);
     Task<ServiceResponse<bool>> DeleteAsync(int id);
 }

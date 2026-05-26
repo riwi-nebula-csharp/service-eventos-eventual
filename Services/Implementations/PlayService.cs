@@ -78,7 +78,7 @@ public class PlayService : IPlayService
 
     public async Task<ServiceResponse<PlayResponseDto?>> GetByIdAsync(int id)
     {
-        var response = new ServiceResponse<PlayResponseDto>();
+        var response = new ServiceResponse<PlayResponseDto?>();
         try
         {
             var play = await _context.Plays
@@ -147,7 +147,7 @@ public class PlayService : IPlayService
         return response;
     }
 
-    public async Task<ServiceResponse<PlayResponseDto?>> UpdateAsync(int id, PlayRequestDto dto)
+    public async Task<ServiceResponse<PlayResponseDto>> UpdateAsync(int id, PlayRequestDto dto)
     {
         var response = new ServiceResponse<PlayResponseDto>();
         try

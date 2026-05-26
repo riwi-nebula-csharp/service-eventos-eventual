@@ -45,9 +45,9 @@ public class SeatService : ISeatService
         return response;
     }
 
-    public async Task<ServiceResponse<SeatResponseDto>> GetByIdAsync(int id)
+    public async Task<ServiceResponse<SeatResponseDto?>> GetByIdAsync(int id)
     {
-        var response = new ServiceResponse<SeatResponseDto>();
+        var response = new ServiceResponse<SeatResponseDto?>();
         try
         {
             var seat = await _context.Seats
@@ -119,7 +119,7 @@ public class SeatService : ISeatService
         return response;
     }
 
-    public async Task<ServiceResponse<SeatResponseDto?>> UpdateAsync(int id, SeatRequestDto dto)
+    public async Task<ServiceResponse<SeatResponseDto>> UpdateAsync(int id, SeatRequestDto dto)
     {
         var response = new ServiceResponse<SeatResponseDto>();
         try

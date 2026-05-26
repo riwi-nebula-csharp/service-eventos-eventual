@@ -21,7 +21,7 @@ public class Ticket
     [Column("status")]
     public TicketStatus Status { get; set; }
     [Column("sold_by")]
-    public string SoldBy { get; set; }
+    public string? SoldBy { get; set; }
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
     [Column("updated_at")]

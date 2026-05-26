@@ -180,9 +180,9 @@ public class PerformanceService : IPerformanceService
         return response;
     }
 
-    public async Task<ServiceResponse<PerformanceResponseDto>> GetByIdAsync(int id)
+    public async Task<ServiceResponse<PerformanceResponseDto?>> GetByIdAsync(int id)
     {
-        var response = new ServiceResponse<PerformanceResponseDto>();
+        var response = new ServiceResponse<PerformanceResponseDto?>();
         try
         {
             var performance = await _context.Performances
