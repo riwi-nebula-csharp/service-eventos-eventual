@@ -31,3 +31,11 @@
 | Get       | /api/performance/{id}    | GetById              |
 | Put       | /api/performance/{id}    | Update               |
 | Delete    | /api/play/{id}           | Delete (SoftDelete)  |
+
+# Favorite #
+
+| Metodo | Ruta              | Nombre |
+|--------|-------------------|--------|
+| GET    | api/favorite      | GetAll |
+| POST   | api/favorite      | Create |
+| DELETE | api/favorite/{id} | Delete |

@@ -39,6 +39,7 @@ builder.Services.AddDbContext<TeatroEventsDbContext>(options =>
 builder.Services.AddScoped<IPlayService, PlayService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 var app = builder.Build();
 
 

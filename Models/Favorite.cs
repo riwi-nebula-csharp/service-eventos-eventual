@@ -7,7 +7,7 @@ public class Favorite
     [Column("id")]
     public int Id { get; set; }
     [Column("user_id")]
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
     [Column("play_id")]
     public int PlayId { get; set; }
     public Play Play { get; set; } = null!;
