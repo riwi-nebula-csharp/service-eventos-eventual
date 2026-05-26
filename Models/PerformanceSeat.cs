@@ -12,8 +12,32 @@ public class PerformanceSeat
     [Column("performance_id")]
     public int PerformanceId { get; set; }
     public Performance Performance { get; set; } = null!;
+    
+    // Backing property - maps to DB
     [Column("status")]
-    public PSStatus Status { get; set; }
+    public string StatusString { get; set; } = "available";
+
+    // NotMapped - used in code
+    [NotMapped]
+    public PsStatus Status
+    {
+        get => StatusString switch
+        {
+            "available" => PsStatus.Available,
+            "reserved"  => PsStatus.Reserved,
+            "occupied"  => PsStatus.Occupied,
+            _           => PsStatus.Available // Fallback
+        };
+        set => StatusString = value switch
+        {
+            PsStatus.Available => "available",
+            PsStatus.Reserved  => "reserved",
+            PsStatus.Occupied  => "occupied",
+            _                  => "available" // Fallback
+        };
+    }
+    
+    
     [Column("reserved_until")]
     public DateTime? ReservedUntil { get; set; }
     [Column("scanned_by")]
@@ -24,15 +48,13 @@ public class PerformanceSeat
     public DateTime CreatedAt { get; set; }
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; }
-    [Column("deleted_at")]
-    public DateTime? DeletedAt { get; set; }
-    
+
     public Ticket? Ticket { get; set; }
 }
 
-public enum PSStatus
+public enum PsStatus
 {
-    Available = 0,
+    Available,
     Reserved,
-    Occupied,
+    Occupied
 }

@@ -18,8 +18,32 @@ public class Ticket
     public PerformanceSeat PerformanceSeat { get; set; } = null!;
     [Column("owner_id")]
     public int OwnerId { get; set; }
-    [Column("status")]
-    public TicketStatus Status { get; set; }
+    
+    
+    [Column("status")]    
+    public string StatusString { get; set; } = "Pending";
+
+    // NotMapped - used in code
+    [NotMapped]
+    public TicketStatus Status
+    {
+        get => StatusString switch
+        {
+            "Pending"  => TicketStatus.Pending,
+            "Active"    => TicketStatus.Active,
+            "Cancelled"  => TicketStatus.Cancelled,
+            "Used"   => TicketStatus.Used,
+            _            => TicketStatus.Pending // Fallback
+        };
+        set => StatusString = value switch
+        {
+            TicketStatus.Pending => "Pending",
+            TicketStatus.Active    => "Active",
+            TicketStatus.Cancelled => "Cancelled",
+            TicketStatus.Used  => "Used",
+            _                           => "Pending" // Fallback
+        };
+    }
     [Column("sold_by")]
     public string? SoldBy { get; set; }
     [Column("created_at")]

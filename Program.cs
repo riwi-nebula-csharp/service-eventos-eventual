@@ -1,4 +1,7 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using service_eventos_eventual.Database.Data;
 using service_eventos_eventual.Database.Seeders;
 using service_eventos_eventual.Services.Implementations;
@@ -6,6 +9,24 @@ using service_eventos_eventual.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// JWT Configuration
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)
+            )
+        };
+    });
+
+builder.Services.AddAuthorization();
 // Services
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
@@ -20,6 +41,7 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 var app = builder.Build();
 
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TeatroEventsDbContext>();
@@ -31,7 +53,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 

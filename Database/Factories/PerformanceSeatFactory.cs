@@ -10,7 +10,7 @@ public class PerformanceSeatFactory
         {
             PerformanceId = performanceId,
             SeatId = seatId,
-            Status = PSStatus.Available,
+            Status = PsStatus.Available, 
             ReservedUntil = null,
             ScannedByUserId = null,
             ScannedAt = null,
