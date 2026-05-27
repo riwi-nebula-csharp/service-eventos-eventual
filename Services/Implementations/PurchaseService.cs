@@ -94,7 +94,7 @@ public class PurchaseService : IPurchaseService
         return response;
     }
 
-    public async Task<ServiceResponse<PurchaseResponseDto>> CreateAsync(int buyerId, PurchaseRequestDto dto)
+    public async Task<ServiceResponse<PurchaseResponseDto>> CreateAsync(int buyerId, string buyerEmail, PurchaseRequestDto dto)
     {
         var response = new ServiceResponse<PurchaseResponseDto>();
         try
@@ -127,7 +127,7 @@ public class PurchaseService : IPurchaseService
             var purchase = new Purchase
             {
                 BuyerId = buyerId,
-                BuyerEmail = dto.BuyerEmail,
+                BuyerEmail = buyerEmail,
                 PerformanceId = dto.PerformanceId,
                 TicketCount = dto.TicketCount,
                 TotalPrice = performance.TicketPrice * dto.TicketCount,

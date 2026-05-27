@@ -29,10 +29,6 @@ public class PurchaseRequestDto
     public int TicketCount { get; set; }
 
     [Required]
-    [EmailAddress]
-    public string BuyerEmail { get; set; } = null!;
-
-    [Required]
     public string PaymentMethod { get; set; } = "online";
 
     public string? StripePaymentId { get; set; }

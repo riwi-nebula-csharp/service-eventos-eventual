@@ -25,6 +25,11 @@ public class PurchaseController : ControllerBase
 
         return int.TryParse(value, out var id) ? id : null;
     }
+    private string? GetEmailFromToken()
+    {
+        return User.FindFirst(ClaimTypes.Email)?.Value
+               ?? User.FindFirst("email")?.Value;
+    }
     
     [HttpGet]
     public async Task<IActionResult> GetAll()
@@ -57,11 +62,14 @@ public class PurchaseController : ControllerBase
         var userId = GetUserIdFromToken();
         if (userId == null) return Unauthorized();
 
-        var response = await _service.CreateAsync(userId.Value, dto);
+        var email = GetEmailFromToken();
+        if (email == null) return Unauthorized();
+        
+        var response = await _service.CreateAsync(userId.Value, email, dto);
         if (!response.Success) return BadRequest(response);
         return CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response);
     }
-    
+
     [HttpPatch("{id}/status")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] PurchaseUpdateStatusDto dto)
     {
