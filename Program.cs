@@ -40,6 +40,7 @@ builder.Services.AddScoped<IPlayService, PlayService>();
 builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 var app = builder.Build();
 
 

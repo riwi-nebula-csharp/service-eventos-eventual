@@ -39,3 +39,14 @@
 | GET    | api/favorite      | GetAll |
 | POST   | api/favorite      | Create |
 | DELETE | api/favorite/{id} | Delete |
+
+# Purchase #
+
+| Método   | Ruta                      | Nombre       | Descripción                     |
+|----------|---------------------------|--------------|---------------------------------|
+| GET      | /api/purchase             | GetAll       | Todas las compras (admin)       |
+| GET      | /api/purchase/my          | GetMine      | Compras del usuario autenticado |
+| GET      | /api/purchase/{id}        | GetById      | Compra por ID                   |
+| POST     | /api/purchase             | Create       | Crear compra                    |
+| PATCH    | /api/purchase/{id}/status | UpdateStatus | Actualizar estado               |
+| DELETE   | /api/purchase/{id}        | Delete       | Soft delete                     |

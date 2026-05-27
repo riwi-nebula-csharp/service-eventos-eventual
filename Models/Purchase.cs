@@ -21,7 +21,7 @@ public class Purchase
     [Column("ticket_count")]
     public int TicketCount { get; set; }
 
-    [Column("total_price")]
+    [Column("total_amount")]
     public double TotalPrice { get; set; }
 
     // PaymentMethod backing property
