@@ -32,6 +32,7 @@ public class PurchaseController : ControllerBase
     }
     
     [HttpGet]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> GetAll()
     {
         var response = await _service.GetAllAsync();

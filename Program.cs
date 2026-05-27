@@ -34,7 +34,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<TeatroEventsDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 0)));;
 });
 
 builder.Services.AddScoped<IPlayService, PlayService>();
@@ -43,6 +43,12 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddHostedService<PerformanceStatusUpdaterService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
 var app = builder.Build();
 
 
@@ -61,6 +67,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
+app.UseCors("AllowAll");
 
 app.Run();
 
