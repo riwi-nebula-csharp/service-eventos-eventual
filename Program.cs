@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using service_eventos_eventual.Database.Data;
 using service_eventos_eventual.Database.Seeders;
+using service_eventos_eventual.Services.BackgroundServices;
 using service_eventos_eventual.Services.Implementations;
 using service_eventos_eventual.Services.Interfaces;
 
@@ -41,6 +42,7 @@ builder.Services.AddScoped<ISeatService, SeatService>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+builder.Services.AddHostedService<PerformanceStatusUpdaterService>();
 var app = builder.Build();
 
 
