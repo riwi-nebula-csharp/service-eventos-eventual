@@ -100,7 +100,7 @@ public class PerformanceService : IPerformanceService
             TicketPrice = p.TicketPrice,
             SalesStartDate = p.SalesStartDate,
             SalesEndDate = p.SalesEndDate,
-            Status = p.Status,
+            Status = p.StatusString,
             CreatedAt = p.CreatedAt
         };
 
@@ -128,7 +128,7 @@ public class PerformanceService : IPerformanceService
                     TicketPrice = p.TicketPrice,
                     SalesStartDate = p.SalesStartDate,
                     SalesEndDate = p.SalesEndDate,
-                    Status = p.Status,
+                    Status = p.StatusString,
                     CreatedAt = p.CreatedAt
                 }).ToListAsync();
 
@@ -165,7 +165,7 @@ public class PerformanceService : IPerformanceService
                     TicketPrice = p.TicketPrice,
                     SalesStartDate = p.SalesStartDate,
                     SalesEndDate = p.SalesEndDate,
-                    Status = p.Status,
+                    Status = p.StatusString,
                     CreatedAt = p.CreatedAt
                 }).ToListAsync();
 
