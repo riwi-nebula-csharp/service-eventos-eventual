@@ -53,7 +53,7 @@
 
 # Pqrs #
 
-| Método | Ruta                   | Nombte  | Descripción                  |
+| Método | Ruta                   | Nombre  | Descripción                  |
 |--------|------------------------|---------|------------------------------|
 | GET    | /api/pqrs              | GetAll  | Todas las PQRS (admin)       |
 | GET    | /api/pqrs/my           | GetMine | PQRS del usuario autenticado |
@@ -61,3 +61,13 @@
 | POST   | /api/pqrs              | Create  | Crear PQRS                   |
 | PATCH  | /api/pqrs/{id}/respond | Respond | Responder (admin)            |
 | DELETE | /api/pqrs/{id}         | Delete  | Soft delete                  |
+
+# PerformanceSeat"
+
+| Metodo | Ruta                                 | Nombre           | Descripción                           |
+|--------|--------------------------------------|------------------|---------------------------------------|
+| GET    | api/performanceseat                  | GetAll           | Obtener Todos los asientos            |
+| GET    | api/performanceseat/{id}             | GetById          | Obtener asiento por Id                |
+| GET    | api/performanceseat/performance/{id} | GetByPerformance | Obtener todos asientos de una función |
+| PATCH  | api/performanceseat/{id}/status      | UpdateStatus     | Cambiar estado                        |
+| PATCH  | api/performanceseat/{id}/scan        | Scan             | Registrar escaneo                     |

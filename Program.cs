@@ -44,6 +44,7 @@ builder.Services.AddScoped<IFavoriteService, FavoriteService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddHostedService<PerformanceStatusUpdaterService>();
 builder.Services.AddScoped<IPqrsService, PqrsService>();
+builder.Services.AddScoped<IPerformanceSeatService, PerformanceSeatService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
