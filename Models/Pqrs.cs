@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace service_eventos_eventual.Models;
+
 [Table("pqrs")]
 public class Pqrs
 {
@@ -18,32 +19,31 @@ public class Pqrs
 
     [Column("description")]
     public string Description { get; set; } = null!;
-    
+
     [Column("type")]
-    public string TypeString { get; set; } = "Petition";
+    public string TypeString { get; set; } = "Petitions";
 
     [NotMapped]
     public PqrsType Type
     {
         get => TypeString switch
         {
-            "Concern"    => PqrsType.Concerns,
-            "Petition"   => PqrsType.Petitions,
-            "Complaint"  => PqrsType.Complaints,
-            "Grievance"  => PqrsType.Grievances,
+            "Concerns"   => PqrsType.Concerns,
+            "Petitions"  => PqrsType.Petitions,
+            "Complaints" => PqrsType.Complaints,
+            "Grievances" => PqrsType.Grievances,
             _            => PqrsType.Petitions
         };
         set => TypeString = value switch
         {
-            PqrsType.Concerns   => "Concern",
-            PqrsType.Petitions  => "Petition",
-            PqrsType.Complaints => "Complaint",
-            PqrsType.Grievances => "Grievance",
-            _                   => "Petition"
+            PqrsType.Concerns   => "Concerns",
+            PqrsType.Petitions  => "Petitions",
+            PqrsType.Complaints => "Complaints",
+            PqrsType.Grievances => "Grievances",
+            _                   => "Petitions"
         };
     }
 
-    // Status backing property
     [Column("status")]
     public string StatusString { get; set; } = "Pending";
 
@@ -60,19 +60,22 @@ public class Pqrs
         };
         set => StatusString = value switch
         {
-            PqrsStatus.Pending     => "Pending",
-            PqrsStatus.InProgress  => "In_progress",
-            PqrsStatus.Completed   => "Completed",
-            PqrsStatus.Cancelled   => "Cancelled",
-            _                      => "Pending"
+            PqrsStatus.Pending    => "Pending",
+            PqrsStatus.InProgress => "In_progress",
+            PqrsStatus.Completed  => "Completed",
+            PqrsStatus.Cancelled  => "Cancelled",
+            _                     => "Pending"
         };
     }
 
     [Column("response")]
     public string? Response { get; set; }
 
-    [Column("response_at")]
-    public DateTime? ResponseAt { get; set; }
+    [Column("responded_by")]
+    public int? RespondedBy { get; set; }
+
+    [Column("responded_at")]
+    public DateTime? RespondedAt { get; set; }
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

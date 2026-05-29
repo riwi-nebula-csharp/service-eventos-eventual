@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using service_eventos_eventual.DTOs;
 using service_eventos_eventual.Services.Interfaces;
@@ -15,17 +16,11 @@ public class PlayController : ControllerBase
         _service = service;
     }
 
+    // Público — cualquiera puede ver la cartelera
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         var response = await _service.GetAllAsync();
-        return Ok(response);
-    }
-
-    [HttpGet("deleted")]
-    public async Task<IActionResult> GetAllDeleted()
-    {
-        var response = await _service.GetAllDeletedAsync();
         return Ok(response);
     }
 
@@ -37,7 +32,17 @@ public class PlayController : ControllerBase
         return Ok(response);
     }
 
+    // Solo admin puede gestionar obras
+    [HttpGet("deleted")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> GetAllDeleted()
+    {
+        var response = await _service.GetAllDeletedAsync();
+        return Ok(response);
+    }
+
     [HttpPost]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Create([FromBody] PlayRequestDto dto)
     {
         var response = await _service.CreateAsync(dto);
@@ -46,6 +51,7 @@ public class PlayController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Update(int id, [FromBody] PlayRequestDto dto)
     {
         var response = await _service.UpdateAsync(id, dto);
@@ -54,6 +60,7 @@ public class PlayController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var response = await _service.DeleteAsync(id);
