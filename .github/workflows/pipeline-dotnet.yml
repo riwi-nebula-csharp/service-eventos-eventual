@@ -10,9 +10,11 @@ permissions:
   contents: read
 
 jobs:
+  # ─── JOB 1: Construir la imagen y subirla a GHCR ─────────────────────────
   build-and-push:
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -40,10 +42,13 @@ jobs:
           docker build -f Dockerfile -t ghcr.io/${{ github.repository }}:latest .
           docker push ghcr.io/${{ github.repository }}:latest
 
+  # ─── JOB 2: Desplegar en el VPS ──────────────────────────────────────────
+  # Solo corre si el job anterior terminó exitosamente
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v0.1.9
@@ -52,11 +57,40 @@ jobs:
           username: root
           key: ${{ secrets.SSH_KEY }}
           port: 22
+          # Pasar los secretos como variables de entorno al contexto SSH
+          # Esto evita problemas de expansión de caracteres especiales en el script
+          envs: APP_SETTINGS,GH_TOKEN,GH_REPOSITORY,CONTAINER_NAME
           script: |
-            docker login ghcr.io -u ${{ github.actor }} -p ${{ secrets.TOKEN }}
-            docker pull ghcr.io/${{ github.repository }}:latest
-            docker stop ${{ github.event.repository.name }} || true
-            docker rm ${{ github.event.repository.name }} || true
-            docker run -d --name ${{ github.event.repository.name }} \
+            # 1. Login al registry con el token que viene como variable de entorno
+            echo "$GH_TOKEN" | docker login ghcr.io -u github-actions --password-stdin
+
+            # 2. Traer la imagen nueva
+            docker pull ghcr.io/$GH_REPOSITORY:latest
+
+            # 3. Detener y eliminar el contenedor anterior si existe
+            docker stop $CONTAINER_NAME || true
+            docker rm $CONTAINER_NAME || true
+
+            # 4. Crear el directorio y escribir el appsettings.json en el VPS
+            #    Este archivo luego se monta dentro del contenedor
+            mkdir -p /app/$CONTAINER_NAME
+            echo "$APP_SETTINGS" > /app/$CONTAINER_NAME/appsettings.json
+
+            # 5. Correr el contenedor nuevo
+            #    El volume mount pone el appsettings.json en /app/appsettings.json
+            #    que es exactamente donde ASP.NET Core lo busca (WORKDIR del Dockerfile)
+            docker run -d \
+              --name $CONTAINER_NAME \
+              --restart unless-stopped \
               -p 8061:8080 \
-              ghcr.io/${{ github.repository }}:latest
+              -v /app/$CONTAINER_NAME/appsettings.json:/app/appsettings.json:ro \
+              ghcr.io/$GH_REPOSITORY:latest
+
+            # 6. Verificar que el contenedor quedó corriendo
+            docker ps | grep $CONTAINER_NAME
+
+        env:
+          APP_SETTINGS: ${{ secrets.APP_SETTINGS }}
+          GH_TOKEN: ${{ secrets.TOKEN }}
+          GH_REPOSITORY: ${{ github.repository }}
+          CONTAINER_NAME: ${{ github.event.repository.name }}
