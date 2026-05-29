@@ -14,7 +14,7 @@ public class PerformanceStatusUpdaterService : BackgroundService
         ILogger<PerformanceStatusUpdaterService> logger)
     {
         _scopeFactory = scopeFactory;
-        _logger = logger;
+        _logger       = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -28,27 +28,71 @@ public class PerformanceStatusUpdaterService : BackgroundService
 
     private async Task UpdatePerformanceStatuses()
     {
-        using var scope = _scopeFactory.CreateScope();
+        using var scope   = _scopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<TeatroEventsDbContext>();
 
         var now = DateTime.UtcNow;
+        int count = 0;
 
-        var performances = await context.Performances
+        // ── scheduled → on_sale ────────────────────────────────────────────
+        // Cuando la fecha de inicio de ventas ya pasó
+        var toOpenSale = await context.Performances
             .Where(p =>
-                p.DeletedAt == null &&
-                p.StatusString == "scheduled" &&
-                p.SalesStartDate <= now)
+                p.DeletedAt       == null        &&
+                p.StatusString    == "scheduled" &&
+                p.SalesStartDate  <= now)
             .ToListAsync();
 
-        if (!performances.Any()) return;
-
-        foreach (var performance in performances)
+        foreach (var p in toOpenSale)
         {
-            performance.StatusString = "on_sale";
-            performance.UpdatedAt = now;
+            p.StatusString = "on_sale";
+            p.UpdatedAt    = now;
+            count++;
         }
 
-        await context.SaveChangesAsync();
-        _logger.LogInformation("{Count} performance(s) updated to on_sale", performances.Count);
+        // ── on_sale → finished ─────────────────────────────────────────────
+        // Cuando la fecha/hora del evento ya terminó
+        // Combinamos PerformanceDate (DateOnly) + EndTime (TimeOnly) en un DateTime UTC
+        var toFinish = await context.Performances
+            .Where(p =>
+                p.DeletedAt    == null    &&
+                p.StatusString == "on_sale")
+            .ToListAsync();
+
+        foreach (var p in toFinish)
+        {
+            // Reconstruimos el DateTime de fin de función
+            var endDateTime = p.PerformanceDate.ToDateTime(p.EndTime);
+            if (endDateTime < now)
+            {
+                p.StatusString = "finished";
+                p.UpdatedAt    = now;
+                count++;
+            }
+        }
+
+        // sold_out → finished también (si la función ya pasó aunque esté agotada)
+        var soldOutToFinish = await context.Performances
+            .Where(p =>
+                p.DeletedAt    == null      &&
+                p.StatusString == "sold_out")
+            .ToListAsync();
+
+        foreach (var p in soldOutToFinish)
+        {
+            var endDateTime = p.PerformanceDate.ToDateTime(p.EndTime);
+            if (endDateTime < now)
+            {
+                p.StatusString = "finished";
+                p.UpdatedAt    = now;
+                count++;
+            }
+        }
+
+        if (count > 0)
+        {
+            await context.SaveChangesAsync();
+            _logger.LogInformation("{Count} performance(s) status updated", count);
+        }
     }
 }

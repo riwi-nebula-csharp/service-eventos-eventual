@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using service_eventos_eventual.Database.Data;
 using service_eventos_eventual.Database.Seeders;
 using service_eventos_eventual.DTOs;
 using service_eventos_eventual.Models;
 using service_eventos_eventual.Response;
 using service_eventos_eventual.Services.Interfaces;
+
 
 namespace service_eventos_eventual.Services.Implementations;
 
@@ -100,7 +102,7 @@ public class PerformanceService : IPerformanceService
             TicketPrice = p.TicketPrice,
             SalesStartDate = p.SalesStartDate,
             SalesEndDate = p.SalesEndDate,
-            Status = p.StatusString,
+            Status = p.Status,
             CreatedAt = p.CreatedAt
         };
 
@@ -128,7 +130,7 @@ public class PerformanceService : IPerformanceService
                     TicketPrice = p.TicketPrice,
                     SalesStartDate = p.SalesStartDate,
                     SalesEndDate = p.SalesEndDate,
-                    Status = p.StatusString,
+                    Status = p.Status,
                     CreatedAt = p.CreatedAt
                 }).ToListAsync();
 
@@ -165,7 +167,7 @@ public class PerformanceService : IPerformanceService
                     TicketPrice = p.TicketPrice,
                     SalesStartDate = p.SalesStartDate,
                     SalesEndDate = p.SalesEndDate,
-                    Status = p.StatusString,
+                    Status = p.Status,
                     CreatedAt = p.CreatedAt
                 }).ToListAsync();
 
@@ -331,4 +333,70 @@ public class PerformanceService : IPerformanceService
         }
         return response;
     }
+    
+    public async Task<ServiceResponse<SeatMapDto>> GetSeatMapAsync(int performanceId)
+{
+    var response = new ServiceResponse<SeatMapDto>();
+    try
+    {
+        var performance = await _context.Performances
+            .AsNoTracking()
+            .Include(p => p.Play)
+            .FirstOrDefaultAsync(p => p.Id == performanceId && p.DeletedAt == null);
+
+        if (performance == null)
+        {
+            response.Success = false;
+            response.Message = $"Performance with Id {performanceId} not found";
+            return response;
+        }
+
+        var performanceSeats = await _context.PerformanceSeats
+            .AsNoTracking()
+            .Include(ps => ps.Seat)
+            .Where(ps => ps.PerformanceId == performanceId)
+            .OrderBy(ps => ps.Seat.RowNumber)
+            .ThenBy(ps => ps.Seat.SeatOrder)
+            .ToListAsync();
+
+        // Agrupar por fila para que el frontend pueda renderizar fila por fila
+        var rows = performanceSeats
+            .GroupBy(ps => ps.Seat.RowName)
+            .OrderBy(g => performanceSeats
+                .First(ps => ps.Seat.RowName == g.Key).Seat.RowNumber)
+            .Select(g => new SeatRowDto
+            {
+                RowName = g.Key.ToString(),
+                Seats   = g.Select(ps => new SeatSlotDto
+                {
+                    PerformanceSeatId = ps.Id,
+                    SeatNumber        = ps.Seat.SeatNumber,
+                    RowOrder          = ps.Seat.RowNumber,
+                    SeatOrder         = ps.Seat.SeatOrder,
+                    Status            = ps.StatusString
+                }).ToList()
+            }).ToList();
+
+        response.Data = new SeatMapDto
+        {
+            PerformanceId  = performance.Id,
+            PlayName       = performance.Play.Name,
+            PerformanceDate= performance.PerformanceDate,
+            StartTime      = performance.StartTime,
+            TicketPrice = (decimal)performance.TicketPrice,
+            TotalSeats     = performanceSeats.Count,
+            AvailableSeats = performanceSeats.Count(ps => ps.StatusString == "available"),
+            Rows           = rows
+        };
+
+        response.Success = true;
+        response.Message = "Seat map retrieved successfully";
+    }
+    catch (Exception ex)
+    {
+        response.Success = false;
+        response.Message = $"Error retrieving seat map: {ex.Message}";
+    }
+    return response;
+}
 }

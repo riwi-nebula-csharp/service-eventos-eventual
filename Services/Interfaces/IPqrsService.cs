@@ -5,10 +5,11 @@ namespace service_eventos_eventual.Services.Interfaces;
 
 public interface IPqrsService
 {
-    Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllAsync();
+    // Cliente
     Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllByUserAsync(int userId);
-    Task<ServiceResponse<PqrsResponseDto?>> GetByIdAsync(int id);
-    Task<ServiceResponse<PqrsResponseDto>> CreateAsync(int userId, string userEmail, PqrsRequestDto dto);
-    Task<ServiceResponse<PqrsResponseDto>> RespondAsync(int id, PqrsRespondDto dto);
-    Task<ServiceResponse<bool>> DeleteAsync(int id);
+    Task<ServiceResponse<PqrsResponseDto>>              CreateAsync(int userId, string userEmail, PqrsCreateDto dto);
+
+    // Admin
+    Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllAsync();
+    Task<ServiceResponse<PqrsResponseDto>>              RespondAsync(int id, int adminId, PqrsRespondDto dto);
 }

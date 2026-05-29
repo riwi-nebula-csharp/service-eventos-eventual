@@ -16,27 +16,7 @@ public class PqrsService : IPqrsService
         _context = context;
     }
 
-    public async Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllAsync()
-    {
-        var response = new ServiceResponse<IEnumerable<PqrsResponseDto>>();
-        try
-        {
-            response.Data = await _context.Pqrs
-                .AsNoTracking()
-                .Where(p => p.DeletedAt == null)
-                .Select(p => MapToDto(p))
-                .ToListAsync();
-
-            response.Success = true;
-            response.Message = "PQRS retrieved successfully";
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = $"Error retrieving PQRS: {ex.Message}";
-        }
-        return response;
-    }
+    // ─── Cliente: ver sus propias PQRS ────────────────────────────────────
 
     public async Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllByUserAsync(int userId)
     {
@@ -46,37 +26,10 @@ public class PqrsService : IPqrsService
             response.Data = await _context.Pqrs
                 .AsNoTracking()
                 .Where(p => p.UserId == userId && p.DeletedAt == null)
+                .OrderByDescending(p => p.CreatedAt)
                 .Select(p => MapToDto(p))
                 .ToListAsync();
 
-            response.Success = true;
-            response.Message = "User PQRS retrieved successfully";
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = $"Error retrieving user PQRS: {ex.Message}";
-        }
-        return response;
-    }
-
-    public async Task<ServiceResponse<PqrsResponseDto?>> GetByIdAsync(int id)
-    {
-        var response = new ServiceResponse<PqrsResponseDto?>();
-        try
-        {
-            var pqrs = await _context.Pqrs
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedAt == null);
-
-            if (pqrs == null)
-            {
-                response.Success = false;
-                response.Message = $"PQRS with Id {id} not found";
-                return response;
-            }
-
-            response.Data = MapToDto(pqrs);
             response.Success = true;
             response.Message = "PQRS retrieved successfully";
         }
@@ -88,12 +41,15 @@ public class PqrsService : IPqrsService
         return response;
     }
 
-    public async Task<ServiceResponse<PqrsResponseDto>> CreateAsync(int userId, string userEmail, PqrsRequestDto dto)
+    // ─── Cliente: crear PQRS ──────────────────────────────────────────────
+
+    public async Task<ServiceResponse<PqrsResponseDto>> CreateAsync(
+        int userId, string userEmail, PqrsCreateDto dto)
     {
         var response = new ServiceResponse<PqrsResponseDto>();
         try
         {
-            var validTypes = new[] { "Petition", "Concern", "Complaint", "Grievance" };
+            var validTypes = new[] { "Concerns", "Petitions", "Complaints", "Grievances" };
             if (!validTypes.Contains(dto.Type))
             {
                 response.Success = false;
@@ -103,20 +59,20 @@ public class PqrsService : IPqrsService
 
             var pqrs = new Pqrs
             {
-                UserId = userId,
-                UserEmail = userEmail,
-                Subject = dto.Subject,
+                UserId      = userId,
+                UserEmail   = userEmail,
+                Subject     = dto.Subject,
                 Description = dto.Description,
-                TypeString = dto.Type,
-                StatusString = "Pending",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                TypeString  = dto.Type,
+                StatusString= "Pending",
+                CreatedAt   = DateTime.UtcNow,
+                UpdatedAt   = DateTime.UtcNow
             };
 
             _context.Pqrs.Add(pqrs);
             await _context.SaveChangesAsync();
 
-            response.Data = MapToDto(pqrs);
+            response.Data    = MapToDto(pqrs);
             response.Success = true;
             response.Message = "PQRS created successfully";
         }
@@ -128,7 +84,35 @@ public class PqrsService : IPqrsService
         return response;
     }
 
-    public async Task<ServiceResponse<PqrsResponseDto>> RespondAsync(int id, PqrsRespondDto dto)
+    // ─── Admin: ver todas las PQRS ────────────────────────────────────────
+
+    public async Task<ServiceResponse<IEnumerable<PqrsResponseDto>>> GetAllAsync()
+    {
+        var response = new ServiceResponse<IEnumerable<PqrsResponseDto>>();
+        try
+        {
+            response.Data = await _context.Pqrs
+                .AsNoTracking()
+                .Where(p => p.DeletedAt == null)
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => MapToDto(p))
+                .ToListAsync();
+
+            response.Success = true;
+            response.Message = "All PQRS retrieved successfully";
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"Error retrieving PQRS: {ex.Message}";
+        }
+        return response;
+    }
+
+    // ─── Admin: responder una PQRS ────────────────────────────────────────
+
+    public async Task<ServiceResponse<PqrsResponseDto>> RespondAsync(
+        int id, int adminId, PqrsRespondDto dto)
     {
         var response = new ServiceResponse<PqrsResponseDto>();
         try
@@ -151,13 +135,15 @@ public class PqrsService : IPqrsService
                 return response;
             }
 
-            pqrs.Response = dto.Response;
+            pqrs.Response     = dto.Response;
             pqrs.StatusString = dto.Status;
-            pqrs.ResponseAt = DateTime.UtcNow;
-            pqrs.UpdatedAt = DateTime.UtcNow;
+            pqrs.RespondedBy  = adminId;
+            pqrs.RespondedAt  = DateTime.UtcNow;
+            pqrs.UpdatedAt    = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
 
-            response.Data = MapToDto(pqrs);
+            response.Data    = MapToDto(pqrs);
             response.Success = true;
             response.Message = "PQRS responded successfully";
         }
@@ -169,49 +155,19 @@ public class PqrsService : IPqrsService
         return response;
     }
 
-    public async Task<ServiceResponse<bool>> DeleteAsync(int id)
-    {
-        var response = new ServiceResponse<bool>();
-        try
-        {
-            var pqrs = await _context.Pqrs
-                .FirstOrDefaultAsync(p => p.Id == id && p.DeletedAt == null);
-
-            if (pqrs == null)
-            {
-                response.Success = false;
-                response.Data = false;
-                response.Message = $"PQRS with Id {id} not found";
-                return response;
-            }
-
-            pqrs.DeletedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-
-            response.Success = true;
-            response.Data = true;
-            response.Message = "PQRS deleted successfully";
-        }
-        catch (Exception ex)
-        {
-            response.Success = false;
-            response.Message = $"Error deleting PQRS: {ex.Message}";
-        }
-        return response;
-    }
-
     private static PqrsResponseDto MapToDto(Pqrs p) => new()
     {
-        Id = p.Id,
-        UserId = p.UserId,
-        UserEmail = p.UserEmail,
-        Subject = p.Subject,
+        Id          = p.Id,
+        UserId      = p.UserId,
+        UserEmail   = p.UserEmail,
+        Subject     = p.Subject,
         Description = p.Description,
-        Type = p.TypeString,
-        Status = p.StatusString,
-        Response = p.Response,
-        ResponseAt = p.ResponseAt,
-        CreatedAt = p.CreatedAt,
-        UpdatedAt = p.UpdatedAt
+        Type        = p.TypeString,
+        Status      = p.StatusString,
+        Response    = p.Response,
+        RespondedBy = p.RespondedBy,
+        RespondedAt = p.RespondedAt,
+        CreatedAt   = p.CreatedAt,
+        UpdatedAt   = p.UpdatedAt
     };
 }

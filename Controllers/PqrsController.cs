@@ -18,29 +18,17 @@ public class PqrsController : ControllerBase
         _service = service;
     }
 
-    private int? GetUserIdFromToken()
-    {
-        var value = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                    ?? User.FindFirst("sub")?.Value;
+    private int? GetUserIdFromToken() =>
+        int.TryParse(
+            User.FindFirst("sub")?.Value ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            out var id) ? id : null;
 
-        return int.TryParse(value, out var id) ? id : null;
-    }
+    private string? GetEmailFromToken() =>
+        User.FindFirst("email")?.Value ?? User.FindFirst(ClaimTypes.Email)?.Value;
 
-    private string? GetEmailFromToken()
-    {
-        return User.FindFirst(ClaimTypes.Email)?.Value
-               ?? User.FindFirst("email")?.Value;
-    }
+    // ─── Cliente ──────────────────────────────────────────────────────────
 
-    // GET api/pqrs  — admin: all
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
-    {
-        var response = await _service.GetAllAsync();
-        return Ok(response);
-    }
-
-    // GET api/pqrs/my  — user: own
+    /// <summary>Ver mis PQRS y sus respuestas</summary>
     [HttpGet("my")]
     public async Task<IActionResult> GetMine()
     {
@@ -51,46 +39,40 @@ public class PqrsController : ControllerBase
         return Ok(response);
     }
 
-    // GET api/pqrs/{id}
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var response = await _service.GetByIdAsync(id);
-        if (!response.Success) return NotFound(response);
-        return Ok(response);
-    }
-
-    // POST api/pqrs
+    /// <summary>Crear una PQRS</summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] PqrsRequestDto dto)
+    public async Task<IActionResult> Create([FromBody] PqrsCreateDto dto)
     {
         var userId = GetUserIdFromToken();
-        if (userId == null) return Unauthorized();
-
-        var email = GetEmailFromToken();
-        if (email == null) return Unauthorized();
+        var email  = GetEmailFromToken();
+        if (userId == null || email == null) return Unauthorized();
 
         var response = await _service.CreateAsync(userId.Value, email, dto);
         if (!response.Success) return BadRequest(response);
-        return CreatedAtAction(nameof(GetById), new { id = response.Data!.Id }, response);
-    }
-
-    // PATCH api/pqrs/{id}/respond  — admin
-    [HttpPatch("{id}/respond")]
-    [Authorize(Roles = "admin")]
-    public async Task<IActionResult> Respond(int id, [FromBody] PqrsRespondDto dto)
-    {
-        var response = await _service.RespondAsync(id, dto);
-        if (!response.Success) return BadRequest(response);
         return Ok(response);
     }
 
-    // DELETE api/pqrs/{id}
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    // ─── Admin ────────────────────────────────────────────────────────────
+
+    /// <summary>Ver todas las PQRS — solo admin</summary>
+    [HttpGet]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> GetAll()
     {
-        var response = await _service.DeleteAsync(id);
-        if (!response.Success) return NotFound(response);
+        var response = await _service.GetAllAsync();
+        return Ok(response);
+    }
+
+    /// <summary>Responder una PQRS — solo admin</summary>
+    [HttpPatch("{id:int}/respond")]
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> Respond(int id, [FromBody] PqrsRespondDto dto)
+    {
+        var adminId = GetUserIdFromToken();
+        if (adminId == null) return Unauthorized();
+
+        var response = await _service.RespondAsync(id, adminId.Value, dto);
+        if (!response.Success) return BadRequest(response);
         return Ok(response);
     }
 }

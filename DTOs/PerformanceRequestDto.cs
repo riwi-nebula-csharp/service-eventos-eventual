@@ -33,6 +33,6 @@ public class PerformanceResponseDto
     public double TicketPrice { get; set; }
     public DateTime SalesStartDate { get; set; }
     public DateTime SalesEndDate { get; set; }
-    public string Status { get; set; } = null!;
+    public PerformanceStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
 }
