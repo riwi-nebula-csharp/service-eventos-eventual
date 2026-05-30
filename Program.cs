@@ -57,6 +57,7 @@ builder.Services.AddScoped<IPurchaseService,    PurchaseService>();
 builder.Services.AddScoped<ITicketService,      TicketService>();
 builder.Services.AddScoped<IPqrsService,        PqrsService>();
 builder.Services.AddScoped<IQrService,          QrService>();
+builder.Services.AddScoped<IMetricsService,     MetricsService>();
 
 builder.Services.AddHostedService<PerformanceStatusUpdaterService>();
 

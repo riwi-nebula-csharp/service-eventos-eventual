@@ -194,8 +194,7 @@ public class PurchaseService : IPurchaseService
             string qrUrl;
             try
             {
-                // qrUrl = await _qrService.GenerateAndUploadAsync(uuid);
-                qrUrl = string.Empty;
+                qrUrl = await _qrService.GenerateAndUploadAsync(uuid.ToString());
             }
             catch (Exception ex)
             {
