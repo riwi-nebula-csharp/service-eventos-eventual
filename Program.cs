@@ -9,8 +9,7 @@ using service_eventos_eventual.Services.Implementations;
 using service_eventos_eventual.Services.Interfaces;
 using Stripe;
 
-// Desactivar el mapeo automático de claims de .NET para que los claims
-// del JWT de Laravel (sub, email, role) lleguen tal cual sin renombrarse
+//Pruebas
 System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
 
