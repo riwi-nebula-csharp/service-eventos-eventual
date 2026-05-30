@@ -7,6 +7,7 @@ using service_eventos_eventual.Database.Seeders;
 using service_eventos_eventual.Services.BackgroundServices;
 using service_eventos_eventual.Services.Implementations;
 using service_eventos_eventual.Services.Interfaces;
+using Stripe;
 
 // Desactivar el mapeo automático de claims de .NET para que los claims
 // del JWT de Laravel (sub, email, role) lleguen tal cual sin renombrarse
@@ -58,6 +59,7 @@ builder.Services.AddScoped<ITicketService,      TicketService>();
 builder.Services.AddScoped<IPqrsService,        PqrsService>();
 builder.Services.AddScoped<IQrService,          QrService>();
 builder.Services.AddScoped<IMetricsService,     MetricsService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 builder.Services.AddHostedService<PerformanceStatusUpdaterService>();
 
@@ -67,6 +69,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
         policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
+
+// Stripe
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
 
